@@ -1,21 +1,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "frac.h"
+#define FRAC_PRINT_ERRORS 1
 
 Fraction::Fraction()
 {
     num.val.dblVal = 1;
     num.valType = FRAC_TYPE_DOUBLE;
+    num.dynaAlloc = 0;
     denom.val.dblVal = 1;
     denom.valType = FRAC_TYPE_DOUBLE;
+    denom.dynaAlloc = 0;
 }
 
 Fraction::Fraction(double p_whole)
 {
     num.val.dblVal = p_whole;
     num.valType = FRAC_TYPE_DOUBLE;
+    num.dynaAlloc = 0;
     denom.val.dblVal = 1;
     denom.valType = FRAC_TYPE_DOUBLE;
+    denom.dynaAlloc = 0;
 }
 
 Fraction::Fraction(double p_num, double p_denom)
@@ -27,6 +32,7 @@ Fraction::Fraction(double p_num, double p_denom)
     else
     {
         denom.val.dblVal = 1;
+        denom.dynaAlloc = 0;
         #ifdef FRAC_PRINT_ERRORS
         printf("Mianownik nie może być równy 0");
         #endif // FRAC_PRINT_ERRORS
@@ -34,6 +40,7 @@ Fraction::Fraction(double p_num, double p_denom)
     denom.valType = FRAC_TYPE_DOUBLE;
 
     num.val.dblVal = p_num;
+    num.dynaAlloc = 0;
     num.valType = FRAC_TYPE_DOUBLE;
 }
 
@@ -56,6 +63,19 @@ Fraction::Fraction(double p_whole, double p_num, double p_denom)
     num.valType = FRAC_TYPE_DOUBLE;
 }
 
+Fraction::~Fraction()
+{
+    if (num.valType == FRAC_TYPE_FRAC && num.dynaAlloc && denom.val.fracVal != 0)
+    {
+        delete num.val.fracVal;
+    }
+
+    if (denom.valType == FRAC_TYPE_FRAC && denom.dynaAlloc && denom.val.fracVal != 0)
+    {
+        delete denom.val.fracVal;
+    }
+}
+
 void Fraction::Print()
 {
     printf("Fraction: %lf / %lf = %lf\n", GetNumAsDbl(), GetDenomAsDbl(), GetValue());
@@ -63,19 +83,94 @@ void Fraction::Print()
 
 void Fraction::SetNum(double val)
 {
+    if (num.valType == FRAC_TYPE_FRAC && num.dynaAlloc)
+    {
+        delete num.val.fracVal;
+    }
+
     num.valType = FRAC_TYPE_DOUBLE;
+    num.dynaAlloc = 0;
     num.val.dblVal = val;
 }
 
 void Fraction::SetNum(Fraction &Frac)
 {
+    if (num.valType == FRAC_TYPE_FRAC && num.dynaAlloc)
+    {
+        delete num.val.fracVal;
+    }
+
     num.valType = FRAC_TYPE_FRAC;
+    num.dynaAlloc = 1;
     num.val.fracVal = new Fraction();
-    num.val.fracVal->SetNum(Frac.GetNumAsDbl());
+
+    //Licznik
+    unsigned char tempType;
+    void *tempVal = Frac.GetNumRaw(&tempType);
+    if (tempType == FRAC_TYPE_DOUBLE)
+    {
+        //Rzutowanie okropne, ale nie zwraca błędu
+        num.val.fracVal->SetNum(*(double*)tempVal);
+    }
+    else
+    {
+        if (tempVal == 0)
+        {
+            SetNum(1);
+            SetDenom(1);
+            return;
+        }
+
+        num.val.fracVal->SetNum(*(Fraction*)tempVal);
+    }
+
+    //Mianownik
+    tempVal = Frac.GetDenomRaw(&tempType);
+    if (tempType == FRAC_TYPE_DOUBLE)
+    {
+        //Rzutowanie okropne, ale nie zwraca błędu
+        num.val.fracVal->SetDenom(*(double*)tempVal);
+    }
+    else
+    {
+        if (tempVal == 0)
+        {
+            SetNum(1);
+            SetDenom(1);
+            return;
+        }
+
+        num.val.fracVal->SetDenom(*(Fraction*)tempVal);
+    }
+}
+
+void Fraction::SetNum(Fraction *Frac)
+{
+    if (Frac == 0)
+    {
+        #ifdef FRAC_PRINT_ERRORS
+        printf("Przekazano nie istniejacy ulamek\n");
+        #endif // FRAC_PRINT_ERRORS
+        return;
+    }
+
+    if (num.valType == FRAC_TYPE_FRAC && num.dynaAlloc)
+    {
+        delete num.val.fracVal;
+    }
+
+    num.valType = FRAC_TYPE_FRAC;
+    num.dynaAlloc = 0;
+    num.val.fracVal = Frac;
 }
 
 void Fraction::SetDenom(double val)
 {
+    if (denom.valType == FRAC_TYPE_FRAC && denom.dynaAlloc)
+    {
+        delete denom.val.fracVal;
+    }
+
     if (val == 0)
     {
         #ifdef FRAC_PRINT_ERRORS
@@ -84,8 +179,84 @@ void Fraction::SetDenom(double val)
         return;
     }
 
+    denom.dynaAlloc = 0;
     denom.valType = FRAC_TYPE_DOUBLE;
     denom.val.dblVal = val;
+}
+
+void Fraction::SetDenom(Fraction &Frac)
+{
+    if (denom.valType == FRAC_TYPE_FRAC && denom.dynaAlloc)
+    {
+        delete denom.val.fracVal;
+    }
+
+    denom.valType = FRAC_TYPE_FRAC;
+    denom.dynaAlloc = 1;
+    denom.val.fracVal = new Fraction();
+
+    //Licznik
+    unsigned char tempType;
+    void *tempVal = Frac.GetNumRaw(&tempType);
+    if (tempType == FRAC_TYPE_DOUBLE)
+    {
+        //Rzutowanie okropne, ale nie zwraca błędu
+        denom.val.fracVal->SetNum(*(double*)&tempVal);
+    }
+    else
+    {
+        if (tempVal == 0)
+        {
+            SetNum(1);
+            SetDenom(1);
+            return;
+        }
+
+        denom.val.fracVal->SetNum(*(Fraction*)tempVal);
+    }
+
+    //Mianownik
+    tempVal = Frac.GetDenomRaw(&tempType);
+    if (tempType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.fracVal->SetDenom(*(double*)&tempVal);
+    }
+    else
+    {
+        if (tempVal == 0)
+        {
+            SetNum(1);
+            SetDenom(1);
+            return;
+        }
+
+        denom.val.fracVal->SetDenom(*(Fraction*)tempVal);
+    }
+}
+
+void Fraction::SetDenom(Fraction *Frac)
+{
+    if (Frac == 0)
+    {
+        #ifdef FRAC_PRINT_ERRORS
+        printf("Przekazano nie istniejacy ulamek\n");
+        #endif // FRAC_PRINT_ERRORS
+        return;
+    }
+
+    if (denom.valType == FRAC_TYPE_FRAC && denom.dynaAlloc)
+    {
+        delete denom.val.fracVal;
+    }
+
+    denom.valType = FRAC_TYPE_FRAC;
+    denom.dynaAlloc = 0;
+    denom.val.fracVal = Frac;
+}
+
+long long Fraction::GetWholes()
+{
+    return (long long)(GetValue());
 }
 
 double Fraction::GetNumAsDbl()
@@ -180,8 +351,8 @@ void* Fraction::GetDenomRaw(unsigned char *out_type)
         #endif // FRAC_PRINT_ERRORS
     }
 
-    *out_type = num.valType;
-    return &num.val;
+    *out_type = denom.valType;
+    return &denom.val;
 }
 
 double Fraction::GetValue()
@@ -236,6 +407,7 @@ void Fraction::GetTrueValues(double *p_num, double *p_denom)
     {
         *p_denom = denom.val.dblVal;
     }
+
     if (*p_denom == 0)
     {
         printf("Jest zle\n");
