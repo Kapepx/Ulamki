@@ -401,7 +401,7 @@ void Fraction::GetTrueValues(double *p_num, double *p_denom)
 {
     if (denom.valType == FRAC_TYPE_FRAC)
     {
-        *p_denom = denom.val.fracVal->GetDenomAsDbl();
+        *p_denom = denom.val.fracVal->GetValue();
     }
     else
     {
@@ -418,7 +418,7 @@ void Fraction::GetTrueValues(double *p_num, double *p_denom)
 
     if  (num.valType == FRAC_TYPE_FRAC)
     {
-        *p_num = num.val.fracVal->GetNumAsDbl();
+        *p_num = num.val.fracVal->GetValue();
     }
     else
     {

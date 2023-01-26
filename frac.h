@@ -47,5 +47,8 @@ public:
     Fraction operator - (Fraction &frac);
     Fraction operator * (Fraction &frac);
     Fraction operator / (Fraction &frac);
+    void Reduce();
+    Fraction GetReduced();
 };
+double NWD(double a, double b);
 #endif // H_FRAC

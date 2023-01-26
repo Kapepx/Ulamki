@@ -7,35 +7,33 @@ using namespace std;
 
 int main()
 {
-    Fraction F1(1, 3), F2(1, 2), F3;
-
-    F3.SetNum(F1);
-    printf("F3.num.dyna: %d\nF3.num.num.dbl: %lf\nF3.num.denom.dbl: %lf\n", F3.num.dynaAlloc, F3.num.val.fracVal->num.val.dblVal, F3.num.val.fracVal->denom.val.dblVal);
-    F3.Print();
-
+    Fraction F1(6, 2);
     F1.Print();
-    F2.Print();
+    F1.Reduce();
+    F1.Print();
 
-    F2 = F2 + 5;
-    F2.Print();
-    F2 = F2 * 2;
-    F2.Print();
-    F2 = F2 - 8;
-    F2.Print();
-    F2 = F2 / 2;
-    F2.Print();
+    F1 = F1 + 5;
+    F1.Print();
 
-    F2 = F2 + F1;
-    F2.Print();
+    F1 = F1 - 3;
+    F1.Print();
 
-    F2 = F2 - F1;
-    F2.Print();
+    F1 = F1 * 2;
+    F1.Print();
 
-    F2 = F2 * F1;
-    F2.Print();
-
-    F2 = F2 / F1;
-    F2.Print();
-    printf("Calosci: %ld\n", F2.GetWholes());
+    F1 = F1 / 3;
+    F1.Print();
     return 0;
+}
+
+double NWD(double a, double b)
+{
+    while (a != b && a > 1 && b > 1)
+    {
+        if (a > b)
+            a -= b;
+        else
+            b -= a;
+    }
+    return a;
 }
