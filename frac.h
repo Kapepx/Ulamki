@@ -50,5 +50,6 @@ public:
     void Reduce();
     Fraction GetReduced();
 };
-double NWD(double a, double b);
+long long NWD(long long a, long long b);
+long long NWW(long long a, long long b);
 #endif // H_FRAC

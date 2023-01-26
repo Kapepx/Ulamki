@@ -32,11 +32,12 @@ Fraction::Fraction(double p_num, double p_denom)
     else
     {
         denom.val.dblVal = 1;
-        denom.dynaAlloc = 0;
+
         #ifdef FRAC_PRINT_ERRORS
         printf("Mianownik nie może być równy 0");
         #endif // FRAC_PRINT_ERRORS
     }
+    denom.dynaAlloc = 0;
     denom.valType = FRAC_TYPE_DOUBLE;
 
     num.val.dblVal = p_num;
@@ -201,7 +202,7 @@ void Fraction::SetDenom(Fraction &Frac)
     if (tempType == FRAC_TYPE_DOUBLE)
     {
         //Rzutowanie okropne, ale nie zwraca błędu
-        denom.val.fracVal->SetNum(*(double*)&tempVal);
+        denom.val.fracVal->SetNum(*(double*)tempVal);
     }
     else
     {
@@ -219,7 +220,7 @@ void Fraction::SetDenom(Fraction &Frac)
     tempVal = Frac.GetDenomRaw(&tempType);
     if (tempType == FRAC_TYPE_DOUBLE)
     {
-        denom.val.fracVal->SetDenom(*(double*)&tempVal);
+        denom.val.fracVal->SetDenom(*(double*)tempVal);
     }
     else
     {

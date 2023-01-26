@@ -41,8 +41,20 @@ Fraction Fraction :: operator + (Fraction &frac)
     GetTrueValues(&trueNum1, &trueDenom1);
     frac.GetTrueValues(&trueNum2, &trueDenom2);
 
-    trueNum1 = (trueNum1 * trueDenom2) + (trueNum2 * trueDenom1);
-    trueDenom1 = trueDenom1 * trueDenom2;
+    if ((long long)trueDenom1 == trueDenom1 && (long long)trueDenom2 == trueDenom2)
+    {
+        long long nww = NWW(trueDenom1, trueDenom2);
+        trueNum1 = trueNum1 * (nww / trueDenom1);
+        trueNum2 = trueNum2 * (nww / trueDenom2);
+        trueNum1 += trueNum2;
+        trueDenom1 = nww;
+    }
+    else
+    {
+        trueNum1 = (trueNum1 * trueDenom2) + (trueNum2 * trueDenom1);
+        trueDenom1 = trueDenom1 * trueDenom2;
+    }
+
     return Fraction(trueNum1, trueDenom1).GetReduced();
 }
 
@@ -96,7 +108,12 @@ Fraction Fraction::GetReduced()
 {
     double trueNum, trueDenom;
     GetTrueValues(&trueNum, &trueDenom);
-    double nwd = NWD(trueNum, trueDenom);
+
+    if ((long long)trueNum != trueNum || (long long)trueDenom != trueDenom)
+    {
+        return *this;
+    }
+    long long nwd = NWD(trueNum, trueDenom);
 
     if ((trueNum / nwd) == (long long)(trueNum / nwd) && (trueDenom / nwd) == (long long)(trueDenom /nwd))
     {
