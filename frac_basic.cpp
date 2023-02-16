@@ -260,7 +260,7 @@ long long Fraction::GetWholes()
     return (long long)(GetValue());
 }
 
-double Fraction::GetNumAsDbl()
+double Fraction::GetNumAsDbl() const
 {
     if (num.valType == FRAC_TYPE_DOUBLE)
     {
@@ -282,7 +282,7 @@ double Fraction::GetNumAsDbl()
     }
 }
 
-double Fraction::GetDenomAsDbl()
+double Fraction::GetDenomAsDbl() const
 {
     if (denom.valType == FRAC_TYPE_DOUBLE)
     {
@@ -304,7 +304,7 @@ double Fraction::GetDenomAsDbl()
     }
 }
 
-Fraction Fraction::GetNumAsFrac()
+Fraction Fraction::GetNumAsFrac() const
 {
     if (num.valType == FRAC_TYPE_DOUBLE)
     {
@@ -316,7 +316,7 @@ Fraction Fraction::GetNumAsFrac()
     }
 }
 
-Fraction Fraction::GetDenomAsFrac()
+Fraction Fraction::GetDenomAsFrac() const
 {
     if (denom.valType == FRAC_TYPE_DOUBLE)
     {
@@ -364,7 +364,7 @@ unsigned char Fraction::GetDenomType()
     return denom.valType;
 }
 
-double Fraction::GetValue()
+double Fraction::GetValue() const
 {
     double result = 0;
     if (num.valType == FRAC_TYPE_DOUBLE)
@@ -406,7 +406,7 @@ double Fraction::GetValue()
     }
 }
 
-void Fraction::GetTrueValues(double *p_num, double *p_denom)
+void Fraction::GetTrueValues(double *p_num, double *p_denom) const
 {
     if (denom.valType == FRAC_TYPE_FRAC)
     {
@@ -419,7 +419,6 @@ void Fraction::GetTrueValues(double *p_num, double *p_denom)
 
     if (*p_denom == 0)
     {
-        printf("Jest zle\n");
         *p_num = 0;
         *p_denom = 0;
         return;
@@ -437,28 +436,31 @@ void Fraction::GetTrueValues(double *p_num, double *p_denom)
 
 void Fraction::Simplify()
 {
+    double temp;
     if (num.valType == FRAC_TYPE_FRAC && num.val.fracVal != 0)
     {
-        num.val.dblVal = num.val.fracVal->GetValue();
+        temp = num.val.fracVal->GetValue();
 
         if (num.dynaAlloc)
         {
             delete num.val.fracVal;
         }
 
+        num.val.dblVal = temp;
         num.dynaAlloc = 0;
         num.valType = FRAC_TYPE_DOUBLE;
     }
 
     if (denom.valType == FRAC_TYPE_FRAC && denom.val.fracVal != 0)
     {
-        denom.val.dblVal = denom.val.fracVal->GetValue();
+        temp = denom.val.fracVal->GetValue();
 
         if (denom.dynaAlloc)
         {
             delete denom.val.fracVal;
         }
 
+        denom.val.dblVal = temp;
         denom.dynaAlloc = 0;
         denom.valType = FRAC_TYPE_DOUBLE;
     }

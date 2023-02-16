@@ -2,16 +2,129 @@
 #include <stdio.h>
 #include "frac.h"
 
-Fraction Fraction :: operator + (double val)
+Fraction Fraction :: operator = (const double val)
+{
+    if (num.valType == FRAC_TYPE_FRAC && num.dynaAlloc)
+    {
+        if (num.val.fracVal != 0)
+            delete num.val.fracVal;
+    }
+
+    num.dynaAlloc = 0;
+    num.valType = FRAC_TYPE_DOUBLE;
+    num.val.dblVal = val * GetDenomAsDbl();
+    return *this;
+}
+
+Fraction Fraction :: operator = (const Fraction &frac)
+{
+    if (num.valType == FRAC_TYPE_FRAC && num.dynaAlloc)
+    {
+        if (num.val.fracVal != 0)
+            delete num.val.fracVal;
+    }
+
+    num.dynaAlloc = 0;
+    num.valType = FRAC_TYPE_DOUBLE;
+    num.val.dblVal = frac.GetNumAsDbl();
+
+    if (denom.valType == FRAC_TYPE_FRAC && denom.dynaAlloc)
+    {
+        if (denom.val.fracVal != 0)
+            delete denom.val.fracVal;
+    }
+
+    denom.dynaAlloc = 0;
+    denom.valType = FRAC_TYPE_DOUBLE;
+    denom.val.dblVal = frac.GetDenomAsDbl();
+    return *this;
+}
+
+Fraction Fraction :: operator += (const double val)
+{
+    NumAdd(val * GetDenomAsDbl());
+    return *this;
+}
+
+Fraction Fraction :: operator -= (const double val)
+{
+    NumSub(val * GetDenomAsDbl());
+    return *this;
+}
+
+Fraction Fraction :: operator *= (const double val)
+{
+    NumMult(val);
+    return *this;
+}
+
+Fraction Fraction :: operator /= (const double val)
+{
+    DenomMult(val);
+    return *this;
+}
+
+Fraction Fraction :: operator += (const Fraction &frac)
+{
+    double denom1 = GetDenomAsDbl(), denom2 = frac.GetDenomAsDbl();
+    double commonDenom;
+    if (denom1 == (long long)denom1 && denom2 == (long long)denom2)
+    {
+        commonDenom = NWW(denom1, denom2);
+    }
+    else
+    {
+        commonDenom = denom1 * denom2;
+    }
+
+    SetDenom(commonDenom);
+    NumMult(commonDenom / denom1);
+    NumAdd(frac.GetNumAsDbl() * (commonDenom / denom2));
+    return *this;
+}
+
+Fraction Fraction :: operator -= (const Fraction &frac)
+{
+    double denom1 = GetDenomAsDbl(), denom2 = frac.GetDenomAsDbl();
+    double commonDenom;
+    if (denom1 == (long long)denom1 && denom2 == (long long)denom2)
+    {
+        commonDenom = NWW(denom1, denom2);
+    }
+    else
+    {
+        commonDenom = denom1 * denom2;
+    }
+
+    SetDenom(commonDenom);
+    NumMult(commonDenom / denom1);
+    NumSub(frac.GetNumAsDbl() * denom2);
+    return *this;
+}
+
+Fraction Fraction :: operator *= (const Fraction &frac)
+{
+    NumMult(frac.GetNumAsDbl());
+    DenomMult(frac.GetDenomAsDbl());
+    return *this;
+}
+
+Fraction Fraction :: operator /= (const Fraction &frac)
+{
+    NumMult(frac.GetDenomAsDbl());
+    DenomMult(frac.GetNumAsDbl());
+    return *this;
+}
+
+Fraction Fraction :: operator + (const double val)
 {
     double trueDenom, trueNum;
     GetTrueValues(&trueNum, &trueDenom);
 
-    //printf("TrueNum: %lf\n", trueNum);
     return Fraction(trueNum + (val * trueDenom), trueDenom).GetReduced();
 }
 
-Fraction Fraction :: operator - (double val)
+Fraction Fraction :: operator - (const double val)
 {
     double trueDenom, trueNum;
     GetTrueValues(&trueNum, &trueDenom);
@@ -19,7 +132,7 @@ Fraction Fraction :: operator - (double val)
     return Fraction(trueNum - (val * trueDenom), trueDenom).GetReduced();
 }
 
-Fraction Fraction :: operator * (double val)
+Fraction Fraction :: operator * (const double val)
 {
     double trueDenom, trueNum;
     GetTrueValues(&trueNum, &trueDenom);
@@ -27,7 +140,7 @@ Fraction Fraction :: operator * (double val)
     return Fraction(trueNum * val, trueDenom).GetReduced();
 }
 
-Fraction Fraction :: operator / (double val)
+Fraction Fraction :: operator / (const double val)
 {
     double trueDenom, trueNum;
     GetTrueValues(&trueNum, &trueDenom);
@@ -35,7 +148,7 @@ Fraction Fraction :: operator / (double val)
     return Fraction(trueNum, trueDenom * val).GetReduced();
 }
 
-Fraction Fraction :: operator + (Fraction &frac)
+Fraction Fraction :: operator + (const Fraction &frac)
 {
     double trueDenom1, trueNum1, trueDenom2, trueNum2;
     GetTrueValues(&trueNum1, &trueDenom1);
@@ -58,7 +171,7 @@ Fraction Fraction :: operator + (Fraction &frac)
     return Fraction(trueNum1, trueDenom1).GetReduced();
 }
 
-Fraction Fraction :: operator - (Fraction &frac)
+Fraction Fraction :: operator - (const Fraction &frac)
 {
     double trueDenom1, trueNum1, trueDenom2, trueNum2;
     GetTrueValues(&trueNum1, &trueDenom1);
@@ -69,7 +182,7 @@ Fraction Fraction :: operator - (Fraction &frac)
     return Fraction(trueNum1, trueDenom1).GetReduced();
 }
 
-Fraction Fraction :: operator * (Fraction &frac)
+Fraction Fraction :: operator * (const Fraction &frac)
 {
     double trueDenom1, trueNum1, trueDenom2, trueNum2;
     GetTrueValues(&trueNum1, &trueDenom1);
@@ -80,7 +193,7 @@ Fraction Fraction :: operator * (Fraction &frac)
     return Fraction(trueNum1, trueDenom1).GetReduced();
 }
 
-Fraction Fraction :: operator / (Fraction &frac)
+Fraction Fraction :: operator / (const Fraction &frac)
 {
     double trueDenom1, trueNum1, trueDenom2, trueNum2;
     GetTrueValues(&trueNum1, &trueDenom1);
@@ -101,12 +214,12 @@ void Fraction::NumAdd(double val)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal + val;
+            *num.val.fracVal += val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dodania do nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -122,12 +235,12 @@ void Fraction::NumAdd(Fraction &Frac)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal + Frac;
+            *num.val.fracVal += Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dodania do nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -143,12 +256,12 @@ void Fraction::NumSub(double val)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal - val;
+            *num.val.fracVal -= val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba odjÃªcia od nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -164,12 +277,12 @@ void Fraction::NumSub(Fraction &Frac)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal - Frac;
+            *num.val.fracVal -= Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba odjÃªcia od nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -185,12 +298,12 @@ void Fraction::NumMult(double val)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal * val;
+            *num.val.fracVal *= val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba mnoÂ¿enia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -206,12 +319,12 @@ void Fraction::NumMult(Fraction &Frac)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal * Frac;
+            *num.val.fracVal *= Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba mnoÂ¿enia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -227,12 +340,12 @@ void Fraction::NumDiv(double val)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal / val;
+            *num.val.fracVal /= val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dzielenia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -248,12 +361,12 @@ void Fraction::NumDiv(Fraction &Frac)
     {
         if (num.val.fracVal != 0)
         {
-            *num.val.fracVal = *num.val.fracVal / Frac;
+            *num.val.fracVal /= Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dzielenia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -269,12 +382,12 @@ void Fraction::DenomAdd(double val)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal + val;
+            *denom.val.fracVal += val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dodania do nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -290,12 +403,12 @@ void Fraction::DenomAdd(Fraction &Frac)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal + Frac;
+            *denom.val.fracVal += Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dodania do nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -311,12 +424,12 @@ void Fraction::DenomSub(double val)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal - val;
+            *denom.val.fracVal -= val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba odjÃªcia od nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -332,12 +445,12 @@ void Fraction::DenomSub(Fraction &Frac)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal - Frac;
+            *denom.val.fracVal -= Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba odjÃªcia od nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -353,12 +466,12 @@ void Fraction::DenomMult(double val)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal * val;
+            *denom.val.fracVal *= val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba mnoÂ¿enia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -374,12 +487,12 @@ void Fraction::DenomMult(Fraction &Frac)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal * Frac;
+            *denom.val.fracVal *= Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba mnoÂ¿enia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -395,12 +508,12 @@ void Fraction::DenomDiv(double val)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal / val;
+            *denom.val.fracVal /= val;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dzielenia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }
@@ -416,12 +529,12 @@ void Fraction::DenomDiv(Fraction &Frac)
     {
         if (denom.val.fracVal != 0)
         {
-            *denom.val.fracVal = *denom.val.fracVal / Frac;
+            *denom.val.fracVal /= Frac;
         }
         else
         {
             #ifdef FRAC_PRINT_ERRORS
-            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            printf("PrÃ³ba dzielenia nieistniejÂ¹cego uÂ³amka\n");
             #endif // FRAC_PRINT_ERRORS
         }
     }

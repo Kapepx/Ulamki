@@ -7,9 +7,16 @@ using namespace std;
 
 int main()
 {
-    Fraction F1(234, 45), F2(12, 6), F3;
+    Fraction F1(234, 45), F2(12, 6), F3, F4(20, 5);
     F1.Print();
     F2.Print();
+    /*F4.Print();
+
+
+    F2 += F4;
+    F4 += F2;
+    F2.Print();
+    F4.Print();*/
 
     printf("====================\n");
     F3.SetNum(F1);
