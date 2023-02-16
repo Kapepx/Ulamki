@@ -91,36 +91,338 @@ Fraction Fraction :: operator / (Fraction &frac)
     return Fraction(trueNum1, trueDenom1).GetReduced();
 }
 
-void Fraction::Reduce()
+void Fraction::NumAdd(double val)
 {
-    double trueNum, trueDenom;
-    GetTrueValues(&trueNum, &trueDenom);
-    double nwd = NWD(trueNum, trueDenom);
-
-    if ((trueNum / nwd) == (long long)(trueNum / nwd) && (trueDenom / nwd) == (long long)(trueDenom /nwd))
+    if (num.valType == FRAC_TYPE_DOUBLE)
     {
-        SetNum(trueNum / nwd);
-        SetDenom(trueDenom / nwd);
-    }
-}
-
-Fraction Fraction::GetReduced()
-{
-    double trueNum, trueDenom;
-    GetTrueValues(&trueNum, &trueDenom);
-
-    if ((long long)trueNum != trueNum || (long long)trueDenom != trueDenom)
-    {
-        return *this;
-    }
-    long long nwd = NWD(trueNum, trueDenom);
-
-    if ((trueNum / nwd) == (long long)(trueNum / nwd) && (trueDenom / nwd) == (long long)(trueDenom /nwd))
-    {
-        return Fraction(trueNum / nwd, trueDenom / nwd);
+        num.val.dblVal += val;
     }
     else
     {
-        return Fraction(trueNum, trueDenom);
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal + val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumAdd(Fraction &Frac)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal += Frac.GetValue();
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal + Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumSub(double val)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal -= val;
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal - val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumSub(Fraction &Frac)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal -= Frac.GetValue();
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal - Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumMult(double val)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal *= val;
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal * val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumMult(Fraction &Frac)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal *= Frac.GetValue();
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal * Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumDiv(double val)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal /= val;
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal / val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::NumDiv(Fraction &Frac)
+{
+    if (num.valType == FRAC_TYPE_DOUBLE)
+    {
+        num.val.dblVal /= Frac.GetValue();
+    }
+    else
+    {
+        if (num.val.fracVal != 0)
+        {
+            *num.val.fracVal = *num.val.fracVal / Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomAdd(double val)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal += val;
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal + val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomAdd(Fraction &Frac)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal += Frac.GetValue();
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal + Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dodania do nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomSub(double val)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal -= val;
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal - val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomSub(Fraction &Frac)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal -= Frac.GetValue();
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal - Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba odjêcia od nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomMult(double val)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal *= val;
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal * val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomMult(Fraction &Frac)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal *= Frac.GetValue();
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal * Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba mno¿enia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomDiv(double val)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal /= val;
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal / val;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
+    }
+}
+
+void Fraction::DenomDiv(Fraction &Frac)
+{
+    if (denom.valType == FRAC_TYPE_DOUBLE)
+    {
+        denom.val.dblVal /= Frac.GetValue();
+    }
+    else
+    {
+        if (denom.val.fracVal != 0)
+        {
+            *denom.val.fracVal = *denom.val.fracVal / Frac;
+        }
+        else
+        {
+            #ifdef FRAC_PRINT_ERRORS
+            printf("Próba dzielenia nieistniej¹cego u³amka\n");
+            #endif // FRAC_PRINT_ERRORS
+        }
     }
 }

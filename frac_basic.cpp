@@ -304,7 +304,6 @@ double Fraction::GetDenomAsDbl()
     }
 }
 
-//TODO
 Fraction Fraction::GetNumAsFrac()
 {
     if (num.valType == FRAC_TYPE_DOUBLE)
@@ -317,7 +316,6 @@ Fraction Fraction::GetNumAsFrac()
     }
 }
 
-//TODO
 Fraction Fraction::GetDenomAsFrac()
 {
     if (denom.valType == FRAC_TYPE_DOUBLE)
@@ -354,6 +352,16 @@ void* Fraction::GetDenomRaw(unsigned char *out_type)
 
     *out_type = denom.valType;
     return &denom.val;
+}
+
+unsigned char Fraction::GetNumType()
+{
+    return num.valType;
+}
+
+unsigned char Fraction::GetDenomType()
+{
+    return denom.valType;
 }
 
 double Fraction::GetValue()
@@ -425,4 +433,106 @@ void Fraction::GetTrueValues(double *p_num, double *p_denom)
     {
         *p_num = num.val.dblVal;
     }
+}
+
+void Fraction::Simplify()
+{
+    if (num.valType == FRAC_TYPE_FRAC && num.val.fracVal != 0)
+    {
+        num.val.dblVal = num.val.fracVal->GetValue();
+
+        if (num.dynaAlloc)
+        {
+            delete num.val.fracVal;
+        }
+
+        num.dynaAlloc = 0;
+        num.valType = FRAC_TYPE_DOUBLE;
+    }
+
+    if (denom.valType == FRAC_TYPE_FRAC && denom.val.fracVal != 0)
+    {
+        denom.val.dblVal = denom.val.fracVal->GetValue();
+
+        if (denom.dynaAlloc)
+        {
+            delete denom.val.fracVal;
+        }
+
+        denom.dynaAlloc = 0;
+        denom.valType = FRAC_TYPE_DOUBLE;
+    }
+}
+
+void Fraction::Reduce()
+{
+    double trueNum, trueDenom;
+    GetTrueValues(&trueNum, &trueDenom);
+    double nwd = NWD(trueNum, trueDenom);
+
+    if ((trueNum / nwd) == (long long)(trueNum / nwd) && (trueDenom / nwd) == (long long)(trueDenom /nwd))
+    {
+        SetNum(trueNum / nwd);
+        SetDenom(trueDenom / nwd);
+    }
+}
+
+void Fraction::Reduce(double val)
+{
+    double trueNum, trueDenom;
+    GetTrueValues(&trueNum, &trueDenom);
+
+    SetNum(trueNum / val);
+    SetDenom(trueNum / val);
+}
+
+void Fraction::Extend(double val)
+{
+    double trueNum, trueDenom;
+    GetTrueValues(&trueNum, &trueDenom);
+
+    SetNum(trueNum * val);
+    SetDenom(trueNum * val);
+}
+
+Fraction Fraction::GetReduced()
+{
+    double trueNum, trueDenom;
+    GetTrueValues(&trueNum, &trueDenom);
+
+    if ((long long)trueNum != trueNum || (long long)trueDenom != trueDenom)
+    {
+        return *this;
+    }
+    long long nwd = NWD(trueNum, trueDenom);
+
+    if ((trueNum / nwd) == (long long)(trueNum / nwd) && (trueDenom / nwd) == (long long)(trueDenom /nwd))
+    {
+        return Fraction(trueNum / nwd, trueDenom / nwd);
+    }
+    else
+    {
+        return Fraction(trueNum, trueDenom);
+    }
+}
+
+long long NWD(long long a, long long b)
+{
+    while (a != b)
+    {
+        if (a > b)
+            a -= b;
+        else
+            b -= a;
+
+        if (a <= 1 || b <= 1)
+            return 1;
+    }
+
+    return a;
+}
+
+long long NWW(long long a, long long b)
+{
+    return (a * b) / NWD(a, b);
 }

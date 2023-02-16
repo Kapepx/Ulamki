@@ -24,12 +24,31 @@ public:
     Fraction(double p_whole, double p_num, double p_denom);
     ~Fraction();
     void Print();
+
     void SetNum(double val);
     void SetNum(Fraction &Frac);
     void SetNum(Fraction *Frac);
+    void NumAdd(double val);
+    void NumAdd(Fraction &Frac);
+    void NumSub(double val);
+    void NumSub(Fraction &Frac);
+    void NumMult(double val);
+    void NumMult(Fraction &Frac);
+    void NumDiv(double val);
+    void NumDiv(Fraction &Frac);
+
     void SetDenom(double val);
     void SetDenom(Fraction &Frac);
     void SetDenom(Fraction *Frac);
+    void DenomAdd(double val);
+    void DenomAdd(Fraction &Frac);
+    void DenomSub(double val);
+    void DenomSub(Fraction &Frac);
+    void DenomMult(double val);
+    void DenomMult(Fraction &Frac);
+    void DenomDiv(double val);
+    void DenomDiv(Fraction &Frac);
+
     long long GetWholes();
     double GetNumAsDbl();
     double GetDenomAsDbl();
@@ -37,6 +56,8 @@ public:
     Fraction GetDenomAsFrac();
     void* GetNumRaw(unsigned char *out_type);
     void* GetDenomRaw(unsigned char *out_type);
+    unsigned char GetNumType();
+    unsigned char GetDenomType();
     double GetValue();
     void GetTrueValues(double *num, double *denom);
     Fraction operator + (double val);
@@ -47,7 +68,10 @@ public:
     Fraction operator - (Fraction &frac);
     Fraction operator * (Fraction &frac);
     Fraction operator / (Fraction &frac);
+    void Simplify();
     void Reduce();
+    void Reduce(double val);
+    void Extend(double val);
     Fraction GetReduced();
 };
 long long NWD(long long a, long long b);
